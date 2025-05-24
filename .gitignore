@@ -1,3 +1,12 @@
+
+# my own content
+clonelists/**
+metadata/**
+internal-config.json
+datafile.dtd
+qt_source/resources_rc.py
+
+# original content
 .*
 *.dat
 !.gitattributes
