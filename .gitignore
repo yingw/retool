@@ -9,16 +9,21 @@ qt_source/resources_rc.py
 # original content
 .*
 *.dat
+*.spec
+*.xlsx
+debug.log
+__pycache__/
+clonelists/
+config/
+config/systems/*.yaml
+metadata/
+mias/
+retroachievements/
+
 !.gitattributes
 !.gitignore
 !.dev
 !tests/**/*.dat
-__pycache__/
-config/systems/*.yaml
-user-config.yaml
-debug.log
-*.spec
-*.xlsx
 
 # dependencies
 /node_modules

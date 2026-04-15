@@ -14,13 +14,38 @@
 		<rom name="Test Title 0 (USA).cue" size="1000" crc="00000000" md5="00000000000000000000000000000000" sha1="0000000000000000000000000000000000000000"/>
 		<rom name="Test Title 0 (USA).bin" size="1000" crc="00000000" md5="00000000000000000000000000000000" sha1="0000000000000000000000000000000000000000"/>
     </game>
-    <!-- This title should be removed when add-ons are excluded -->
+	<!-- These titles should be removed when add-ons are excluded -->
 	<game name="Test Title 1 (USA)">
-        <category>Add-Ons</category>
+		<category>Add-Ons</category>
 		<description>Test Title 1 (USA)</description>
 		<rom name="Test Title 1 (USA).cue" size="1000" crc="00000000" md5="00000000000000000000000000000000" sha1="0000000000000000000000000000000000000000"/>
 		<rom name="Test Title 1 (USA).bin" size="1000" crc="00000000" md5="00000000000000000000000000000000" sha1="0000000000000000000000000000000000000000"/>
-    </game>
+	</game>
+	<game name="Test Title 51 (USA) (Addon)">
+		<description>Test Title 51 (USA) (Addon)</description>
+		<rom name="Test Title 51 (USA) (Addon).cue" size="1000" crc="00000000" md5="00000000000000000000000000000000" sha1="0000000000000000000000000000000000000000"/>
+		<rom name="Test Title 51 (USA) (Addon).bin" size="1000" crc="00000000" md5="00000000000000000000000000000000" sha1="0000000000000000000000000000000000000000"/>
+	</game>
+	<game name="Test Title 52 (USA) (DLC)">
+		<description>Test Title 52 (USA) (DLC)</description>
+		<rom name="Test Title 52 (USA) (DLC).cue" size="1000" crc="00000000" md5="00000000000000000000000000000000" sha1="0000000000000000000000000000000000000000"/>
+		<rom name="Test Title 52 (USA) (DLC).bin" size="1000" crc="00000000" md5="00000000000000000000000000000000" sha1="0000000000000000000000000000000000000000"/>
+	</game>
+	<game name="Test Title 53 (USA) (Addon for XBLA)">
+		<description>Test Title 53 (USA) (Addon for XBLA)</description>
+		<rom name="Test Title 53 (USA) (Addon for XBLA).cue" size="1000" crc="00000000" md5="00000000000000000000000000000000" sha1="0000000000000000000000000000000000000000"/>
+		<rom name="Test Title 53 (USA) (Addon for XBLA).bin" size="1000" crc="00000000" md5="00000000000000000000000000000000" sha1="0000000000000000000000000000000000000000"/>
+	</game>
+	<game name="Test Title 53 (USA) (Avatar)">
+		<description>Test Title 53 (USA) (Avatar)</description>
+		<rom name="Test Title 53 (USA) (Avatar).cue" size="1000" crc="00000000" md5="00000000000000000000000000000000" sha1="0000000000000000000000000000000000000000"/>
+		<rom name="Test Title 53 (USA) (Avatar).bin" size="1000" crc="00000000" md5="00000000000000000000000000000000" sha1="0000000000000000000000000000000000000000"/>
+	</game>
+	<game name="Test Title 53 (USA) (Theme)">
+		<description>Test Title 53 (USA) (Theme)</description>
+		<rom name="Test Title 53 (USA) (Theme).cue" size="1000" crc="00000000" md5="00000000000000000000000000000000" sha1="0000000000000000000000000000000000000000"/>
+		<rom name="Test Title 53 (USA) (Theme).bin" size="1000" crc="00000000" md5="00000000000000000000000000000000" sha1="0000000000000000000000000000000000000000"/>
+	</game>
 	<!-- These titles should be removed when aftermarket titles are excluded -->
 	<game name="Test Title 49 (USA) (Aftermarket)">
 		<description>Test Title 49 (USA) (Aftermarket)</description>
@@ -55,6 +80,12 @@
 		<rom name="Test Title 6 (USA).cue" size="1000" crc="00000000" md5="00000000000000000000000000000000" sha1="0000000000000000000000000000000000000000"/>
 		<rom name="Test Title 6 (USA).bin" size="1000" crc="00000000" md5="00000000000000000000000000000000" sha1="0000000000000000000000000000000000000000"/>
     </game>
+	<game name="Test Title 6 (USA) (Soundtrack)">
+		<category>Games</category>
+		<description>Test Title 6 (USA) (Soundtrack)</description>
+		<rom name="Test Title 6 (USA) (Soundtrack).cue" size="1000" crc="00000000" md5="00000000000000000000000000000000" sha1="0000000000000000000000000000000000000000"/>
+		<rom name="Test Title 6 (USA) (Soundtrack).bin" size="1000" crc="00000000" md5="00000000000000000000000000000000" sha1="0000000000000000000000000000000000000000"/>
+	</game>
     <!-- This title should be removed when bad dumps are excluded -->
     <game name="Test Title 7 (USA) [b]">
 		<description>Test Title 7 (USA) [b]</description>

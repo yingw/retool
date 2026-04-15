@@ -43,21 +43,20 @@ def _initializer_wrapper(actual_initializer: Any, *rest: Any) -> None:
 
 class InterruptiblePool(Pool):
     """
-    A modified version of :class:`multiprocessing.pool.Pool` that has better behavior
-    with regard to ``KeyboardInterrupts`` in the :func:`map` method.
+    A modified version of :class:`multiprocessing.pool.Pool` that has better behavior with
+    regard to `KeyboardInterrupts` in the :func:`map` method.
 
     Args:
-        processes (Any, optional): The number of worker processes to use; defaults to the number
-        of CPUs. Defaults to `None`.
+        processes (Any, optional): The number of worker processes to use; defaults to the
+        number of CPUs. Defaults to `None`.
 
-        initializer (Any, optional): Either `None`, or a callable that will be invoked by each
-        worker process when it starts. Defaults to `None`.
+        initializer (Any, optional): Either `None`, or a callable that will be invoked by
+        each worker process when it starts. Defaults to `None`.
 
         initargs: (Any, optional): Arguments for *initializer*; it will be called as
         `initializer(*initargs)`. Defaults to `()`.
 
-        kwargs (Any, optional): Extra arguments. Python 2.7 supports a `maxtasksperchild`
-        parameter.
+        kwargs (Any, optional): Extra arguments.
     """
 
     wait_timeout = 3600
@@ -68,31 +67,30 @@ class InterruptiblePool(Pool):
         new_initializer = functools.partial(_initializer_wrapper, initializer)
         super().__init__(processes, new_initializer, initargs, **kwargs)
 
+    def map(self: Any, func: Any, iterable: Any, chunksize: Any = None) -> Any:
+        """
+        Equivalent of `map()` built-in, without swallowing `KeyboardInterrupt`.
 
-def poolmap(self: Any, func: Any, iterable: Any, chunksize: Any = None) -> Any:
-    """
-    Equivalent of `map()` built-in, without swallowing `KeyboardInterrupt`.
+        Args:
+            self (Any): The instance of the pool map.
 
-    Args:
-        self (Any): The instance of the pool map.
+            func (Any): The function to apply to the items.
 
-        func (Any): The function to apply to the items.
+            iterable (Any): An iterable of items that will have `func` applied to them.
 
-        iterable (Any): An iterable of items that will have `func` applied to them.
+            chunksize (Any): The number of items from an iterable to pass to the task
+                workers as a batch.
+        """
+        # The key magic is that we must call r.get() with a timeout, because
+        # a Condition.wait() without a timeout swallows KeyboardInterrupts.
+        r = self.map_async(func, iterable, chunksize)
 
-        chunksize (Any): The number of items from an iterable to pass to the
-        task workers as a batch.
-    """
-    # The key magic is that we must call r.get() with a timeout, because
-    # a Condition.wait() without a timeout swallows KeyboardInterrupts.
-    r = self.map_async(func, iterable, chunksize)
-
-    while True:
-        try:
-            return r.get(self.wait_timeout)
-        except TimeoutError:
-            pass
-        except KeyboardInterrupt:
-            self.terminate()
-            self.join()
-            raise
+        while True:
+            try:
+                return r.get(self.wait_timeout)
+            except TimeoutError:
+                pass
+            except KeyboardInterrupt:
+                self.terminate()
+                self.join()
+                raise

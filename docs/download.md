@@ -7,7 +7,7 @@ hide:
 
 Retool is supported on :fontawesome-brands-windows:{:style="margin-left:0.5em; margin-right:0.2em"}
 Windows 10+, :simple-ubuntu:{:style="margin-left:0.5em; margin-right:0.2em"} Ubuntu 20+,
-and :simple-apple:{:style="margin-left:0.5em; margin-right:0.2em"} macOS 10+.
+and :simple-apple:{:style="margin-left:0.5em; margin-right:0.2em"} macOS 15+.
 
 How you download and install Retool will depend on your level of comfort with code, and
 the operating system you use.
@@ -18,17 +18,25 @@ the operating system you use.
 
     1.  Download the Windows binary ZIP file:
 
-        {% include 'includes/file.md' %}
+        {% include 'includes/file_windows.md' %}
 
-        `SHA256: {% include 'includes/sha256.md' %}`
+        `SHA256: {% include 'includes/sha256_windows.md' %}`
 
     1.  Extract the ZIP file to a folder of your choosing.
 
     1.  In that folder, double click `retoolgui.exe`. A Command Prompt window opens, which
         shows the output when Retool is running. Don't close it, as this also closes the
         GUI.
+
     1.  Click **File > Update clone lists** to download the latest clone lists and
         metadata files.
+
+        !!! warning "SSL: CERTIFICATE_VERIFY_FAILED error"
+
+            If you see the error
+            `[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate`
+            when trying to download files in Retool, see
+            [Troubleshooting](troubleshooting.md#windows) for the fix.
 
     !!! note
         Retool's binary is [UPX packed](https://upx.github.io/) to reduce its size on
@@ -53,7 +61,7 @@ the operating system you use.
 
         === "Pip"
             ```
-            pip install alive-progress lxml psutil pyside6 darkdetect strictyaml validators
+            python3 -m pip install alive-progress darkdetect lxml psutil pyside6 strictyaml validators
             ```
 
         === "Hatch"
@@ -61,7 +69,7 @@ the operating system you use.
             1.  Install Hatch if you haven't already:
 
                 ```
-                pip install hatch
+                python3 -m pip install hatch
                 ```
 
             1.  Enter the Hatch virtual environment:
@@ -72,28 +80,17 @@ the operating system you use.
 
                 To exit the environment at any time, run the `exit` command.
 
-        !!! info
-            On systems that have both Python 2 and 3 installed, you might need to run
-            `pip3` instead of `pip`.
-
     1.  Download the latest clone lists and metadata files:
 
         ```
-        retool.py --update
+        python3 retool.py --update
         ```
 
-        !!! info
-            On some operating systems you might need to prefix Python files with `python3`
-            or `python` to run them.
+        !!! warning "SSL: CERTIFICATE_VERIFY_FAILED error"
+
+            If you see the error
+            `[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate`
+            on macOS when trying to download files in Retool, see
+            [Troubleshooting](troubleshooting.md#macos) for the fix.
 
     1.  You can now run `retool.py` or `retoolgui.py`.
-
-    **Linux issues**
-
-    If you get a libxcb error in Linux when launching `retoolgui`, this fixed
-    the problem for me in Ubuntu 20.04:
-
-    ```
-    sudo apt-get install libxcb-randr0-dev \
-            libxcb-xtest0-dev libxcb-xinerama0-dev libxcb-shape0-dev libxcb-xkb-dev
-    ```

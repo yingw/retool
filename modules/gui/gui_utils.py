@@ -8,8 +8,8 @@ from PySide6 import QtCore as qtc
 from PySide6 import QtGui as qtg
 from PySide6 import QtWidgets as qtw
 
-from modules.config import Config
-from modules.dats import format_system_name
+from modules.config.config import Config
+from modules.dat.parse_dat import format_system_name
 from modules.titletools import TitleTools
 from modules.utils import pattern2string
 
@@ -29,17 +29,17 @@ def add_list_items(
         list_widget (qtw.QListWidget): The list widget to add the items to.
 
         dat_details (dict[str, dict[str, str]]): The dictionary that carries DAT file
-        details like its system name and filepath.
+            details like its system name and filepath.
 
         config (Config): The Retool config object.
 
         main_window (Any): The MainWindow widget.
 
         input_type (str, optional): Whether the input as a folder or files. Defaults to
-        `files`.
+            `files`.
 
-        recursive (bool, optional): Whether to treat adding a folder as recursive. Must
-        be used in combination with `input_type='folder'`. Defaults to `False`.
+        recursive (bool, optional): Whether to treat adding a folder as recursive. Must be
+            used in combination with `input_type='folder'`. Defaults to `False`.
     """
     response: list[Any] = []
 
@@ -114,6 +114,10 @@ def add_list_items(
 
         enable_go_button(main_window)
 
+    # If the user cancels out of adding DAT files, reset the list widget
+    if not [list_widget.item(x) for x in range(list_widget.count())]:
+        list_widget.addItem('No DAT files added yet')
+
 
 def disable_incompatible_checkbox(
     checkbox_select: qtw.QCheckBox,
@@ -121,20 +125,19 @@ def disable_incompatible_checkbox(
     checkbox_check: tuple[qtw.QCheckBox, ...] = (),
 ) -> None:
     """
-    When a checkbox is selected that's incompatible with other checkboxes,
-    disable those other checkboxes. Re-enable them when it's cleared.
+    When a checkbox is selected that's incompatible with other checkboxes, disable those
+    other checkboxes. Re-enable them when it's cleared.
 
     Args:
-        checkbox_select (qtw.QCheckBox): The checkbox widget the user has interacted
-        with.
+        checkbox_select (qtw.QCheckBox): The checkbox widget the user has interacted with.
 
         checkbox_disable (tuple[qtw.QCheckBox, ...]): The checkboxes that should be
-        disabled/enabled based on whether or not `checkbox_select` is selected.
+            disabled/enabled based on whether `checkbox_select` is selected.
 
         checkbox_check (tuple[qtw.QCheckBox, ...], optional): If these other checkboxes
-        are selected, don't enable the `checkbox_disable` checkboxes, even if
-        `checkbox_select` is cleared. Useful for three way relationships. For example:
-        checkbox C must be disabled if checkbox A or B are checked. Defaults to `()`.
+            are selected, don't enable the `checkbox_disable` checkboxes, even if
+            `checkbox_select` is cleared. Useful for three way relationships. For example,
+            checkbox C must be disabled if checkbox A or B are checked. Defaults to `()`.
     """
     if checkbox_select.isChecked():
         for checkbox in checkbox_disable:
@@ -157,15 +160,14 @@ def disable_incompatible_element(
     checkbox_select: qtw.QCheckBox, element_disable: tuple[qtw.QCheckBox, ...]
 ) -> None:
     """
-    When a checkbox is selected that's incompatible with other elements,
-    disable those other elements. Re-enable them when it's cleared.
+    When a checkbox is selected that's incompatible with other elements, disable those
+    other elements. Re-enable them when it's cleared.
 
     Args:
-        checkbox_select (qtw.QCheckBox): The checkbox widget the user has interacted
-        with.
+        checkbox_select (qtw.QCheckBox): The checkbox widget the user has interacted with.
 
         element_disable (tuple[qtw.QCheckBox, ...]): The elements that should be
-        disabled/enabled based on whether or not `checkbox_select` is selected.
+            disabled/enabled based on whether `checkbox_select` is selected.
     """
     if checkbox_select.isChecked():
         for element in element_disable:
@@ -177,8 +179,8 @@ def disable_incompatible_element(
 
 def enable_go_button(main_window: Any) -> None:
     """
-    Checks certain conditions to see if the "Process DAT files" button should be
-    enabled or not.
+    Checks certain conditions to see if the "Process DAT files" button should be enabled
+    or not.
 
     Args:
         main_window (Any): The MainWindow widget.
@@ -214,12 +216,12 @@ def enable_go_button(main_window: Any) -> None:
         disabled = True
 
         if message:
-            message = f'{message},\nand add at least one region before you can process DATs'
+            message = f'{message},\nand add at least one region before you can process DATs.'
         else:
-            message = 'You need to add at least one region before you can process DATs'
+            message = 'You need to add at least one region before you can process DATs.'
 
     if message == 'You need to add DAT files to the list':
-        message = f'{message} before you can process them'
+        message = f'{message} before you can process them.'
 
     main_window.ui.buttonGo.setDisabled(disabled)
 
@@ -234,8 +236,8 @@ def enable_go_button(main_window: Any) -> None:
 
 def get_system_name(dat_file_path: str, config: Config) -> str:
     """
-    Given a DAT file path, opens the file and returns its system name with the DAT
-    release group appended to it.
+    Given a DAT file path, opens the file and returns its system name with the DAT release
+    group appended to it.
 
     Args:
         dat_file_path (str): The location of the DAT file.
@@ -339,7 +341,7 @@ def move_list_items(
         destination_list_widget (qtw.QListWidget): The destination widget of the move.
 
         all_items (bool, optional): Whether the user has hit the "move all" button.
-        Defaults to `False`.
+            Defaults to `False`.
     """
     item_list: list[qtw.QListWidgetItem]
 
@@ -429,18 +431,18 @@ def remove_list_items(
     Removes items from the passed in list.
 
     Args:
-        list_widget (qtw.QListWidget): The list widget to remove the items from
+        list_widget (qtw.QListWidget): The list widget to remove the items from.
 
         dat_details (dict[str, dict[str, str]]): The dictionary that carries DAT file
-        details like its system name and filepath.
+            details like its system name and filepath.
 
         system_settings_widget (Any): The widget that holds the system settings. This is
-        updated if there's nothing left in the list widget.
+            updated if there's nothing left in the list widget.
 
         main_window (Any): The MainWindow widget.
 
         remove_all (bool, optional): Whether the user has hit the remove all button, all
-        has individually removed an item. Defaults to `True`.
+            has individually removed an item. Defaults to `True`.
     """
     if remove_all:
         dat_details.clear()
@@ -474,27 +476,16 @@ def set_fonts(parent: Any) -> None:
 
     if sys.platform.startswith('win'):
         fonts = 'Segoe UI, Tahoma, Arial'
+    elif sys.platform == 'darwin':
+        fonts = '.AppleSystemUIFont, Helvetica Neue, Tahoma, Arial'
     elif 'linux' in sys.platform:
         fonts = 'Ubuntu, DejaVu Sans, FreeSans'
 
-        all_widgets = []
-
-        # Since Ubuntu fonts are really wide, find all widgets and decrease their font size
-        try:
-            all_widgets.extend(parent.findChildren(qtw.QPushButton))
-            all_widgets.extend(parent.findChildren(qtw.QCheckBox))
-            all_widgets.extend(parent.findChildren(qtw.QLabel))
-            all_widgets.extend(parent.findChildren(qtw.QLineEdit))
-            all_widgets.extend(parent.findChildren(qtw.QListWidget))
-            all_widgets.extend(parent.findChildren(qtw.QTabWidget))
-            all_widgets.extend(parent.findChildren(qtw.QTextEdit))
-            all_widgets.extend(parent.findChildren(qtw.QToolTip))
-        except Exception:
-            pass
+        widgets = parent.findChildren(qtw.QWidget)
 
         font: qtg.QFont
 
-        for widget in all_widgets:
+        for widget in widgets:
             try:
                 font = widget.font()
                 font.setPointSize(10)
@@ -529,7 +520,18 @@ def set_fonts(parent: Any) -> None:
         except Exception:
             pass
 
-    parent.setStyleSheet(f'font-family: {fonts}')
+    # Change the font assignment for all elements
+    widgets = parent.findChildren(qtw.QWidget)
+
+    for widget in widgets:
+        font_size = widget.font().pointSize()
+        font_weight = widget.font().weight()
+
+        if sys.platform == 'darwin':
+            if font_size == 8:
+                font_size = 12
+
+        widget.setFont(qtg.QFont(fonts, font_size, font_weight))
 
 
 def set_path(
@@ -547,7 +549,8 @@ def set_path(
 
         parent_attr (str): The attribute on the parent that stores the path.
 
-        input_type (str): The filter for the file dialog. Either `folder`, `yaml`, `clone`, or `metadata`.
+        input_type (str): The filter for the file dialog. Either `folder`, `yaml`,
+            `clone`, `metadata`, or `mia`.
     """
     new_path: str = '.'
     if not current_path:
@@ -579,6 +582,22 @@ def set_path(
                 )[0]
             )
         )
+    elif input_type == 'mia':
+        new_path = str(
+            pathlib.Path(
+                qtw.QFileDialog.getOpenFileName(
+                    parent, dir=current_path, filter="MIA file (*.json)"
+                )[0]
+            )
+        )
+    elif input_type == 'ra':
+        new_path = str(
+            pathlib.Path(
+                qtw.QFileDialog.getOpenFileName(
+                    parent, dir=current_path, filter="RetroAchievements file (*.json)"
+                )[0]
+            )
+        )
 
     if new_path != '.':
         label.setText(new_path)
@@ -596,6 +615,7 @@ def select_checkboxes(checkboxes: list[qtw.QCheckBox], set_checked: bool) -> Non
 
     Args:
         checkboxes (list[qtw.QCheckBox]): The list of checkbox widgets.
+
         set_checked (bool): Whether to check or uncheck the checkboxes.
     """
     for checkbox in checkboxes:
@@ -625,7 +645,8 @@ def system_enable(checkbox: qtw.QCheckBox, widgets: list[Any]) -> None:
 
     Args:
         checkbox (qtw.QCheckBox): The checkbox that controls if a widget is enabled
-        or disabled.
+            or disabled.
+
         widgets (list[Any]): A list of widgets to enable or disable.
     """
     for widget in widgets:

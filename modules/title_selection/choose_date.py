@@ -4,8 +4,8 @@ import itertools
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from modules.config import Config
-    from modules.dats import DatNode
+    from modules.config.config import Config
+    from modules.dat.process_dat import DatNode
 
 from modules.titletools import TitleTools, TraceTools
 from modules.utils import Font
@@ -21,8 +21,7 @@ def choose_date(title_set: set[DatNode], config: Config, report_on_match: bool) 
 
         config (Config): The Retool config object.
 
-        report_on_match (bool): Whether Retool needs to report any titles being
-        traced.
+        report_on_match (bool): Whether Retool needs to report any titles being traced.
 
     Returns:
         set[DatNode]: A set of DatNodes filtered by date priority.
@@ -30,13 +29,7 @@ def choose_date(title_set: set[DatNode], config: Config, report_on_match: bool) 
     remove_titles: set[DatNode] = set()
 
     for title_1, title_2 in itertools.combinations(title_set, 2):
-        if (
-            title_1.short_name == title_2.short_name
-            and title_1 in title_set
-            and title_2 in title_set
-            and 'BIOS' not in title_1.categories
-            and 'BIOS' not in title_2.categories
-        ):
+        if TitleTools.check_title_equivalence(title_1, title_2, title_set):
             title_1_date: int = TitleTools.get_date(title_1.full_name, config)
             title_2_date: int = TitleTools.get_date(title_2.full_name, config)
 

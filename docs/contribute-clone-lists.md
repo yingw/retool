@@ -97,6 +97,7 @@ Databases:
 
 - [Atari Mania](http://www.atarimania.com) (Atari titles)
 - [Bootleg Games Wiki](https://bootleggames.fandom.com/)
+- [Colecovision Addiction](https://cvaddict.com/profile.php?gameid=195)
 - [GameTDB](https://www.gametdb.com)
 - [Handheld Underground](https://hhug.me/)
 - [LaunchBox Games Database](https://gamesdb.launchbox-app.com/)
@@ -105,6 +106,7 @@ Databases:
 - [PlayStation DataCenter](https://psxdatacenter.com/) (PlayStation, PlayStation 2,
   and PlayStation Portable titles)
 - [PSCX2 Wiki](https://wiki.pcsx2.net) (PlayStation 2 titles)
+- [Random Meaningless Characters](https://randommeaninglesscharacters.com/) (Nintendo DS/DSi apps and firmware)
 - [Renascene](https://renascene.com/psv/) (PlayStation Vita titles)
 - [Retroplace](https://www.retroplace.com)
 - [Sega Retro](https://segaretro.org/) (Sega console titles)
@@ -112,9 +114,10 @@ Databases:
 - [The PC Engine Software Bible](http://www.pcengine.co.uk/) (NEC PC Engine/TurboGrafx-16
   titles)
 - [The Cutting Room Floor](https://tcrf.net)
+- [The Video Game Critic](https://videogamecritic.com)
 - [The World of CDI](https://www.theworldofcdi.com) (Philips CD-I titles)
-- [VDGB](https://vgdb.io)
 - [VGM](https://www.video-games-museum.com)
+- [VGMdb](https://vgmdb.net)
 
 General sites and retail stores:
 

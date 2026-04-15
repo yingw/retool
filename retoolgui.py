@@ -19,9 +19,9 @@ from PySide6 import QtGui as qtg
 from PySide6 import QtWidgets as qtw
 
 import retool
-from modules.config import Config
+from modules.config.config import Config
 from modules.gui.gui_config import import_config, write_config
-from modules.gui.gui_setup import setup_gui_global, setup_gui_system
+from modules.gui.gui_init import init_gui_global, init_gui_system
 from modules.gui.gui_utils import enable_go_button, show_hide
 from modules.gui.gui_widgets import CustomComboBox, CustomList, custom_widgets
 from modules.gui.retool_ui import Ui_MainWindow  # type: ignore
@@ -46,6 +46,12 @@ def main() -> None:
     # Set variables
     app: qtw.QApplication = qtw.QApplication(sys.argv)
     window: MainWindow = MainWindow()
+
+    # Fix the dock icon on macOS
+    if sys.platform == 'darwin':
+        icon = qtg.QIcon()
+        icon.addFile(':/retoolIcon/images/retool.icns', qtc.QSize(), qtg.QIcon.Normal, qtg.QIcon.Off)  # type: ignore
+        app.setWindowIcon(icon)
 
     # Show any line edits we need to if an associated checkbox is selected in
     # user-config.yaml. This has to be delayed, or they don't show.
@@ -121,10 +127,10 @@ class MainWindow(qtw.QMainWindow):
         self.ui.tabWidgetSystemSettings.setEnabled(False)
 
         # Populate the global settings with data and set up user interactions
-        setup_gui_global(self, dat_details, self.config)
+        init_gui_global(self, dat_details, self.config)
 
         # Populate the system settings with data and set up user interactions
-        setup_gui_system(self, dat_details, self.config)
+        init_gui_system(self, dat_details, self.config)
 
         # Check if clone lists or metadata files are required
         if not (
@@ -162,7 +168,9 @@ class MainWindow(qtw.QMainWindow):
         interactive_widgets.extend(
             self.ui.centralwidget.findChildren(
                 qtw.QCheckBox,
-                qtc.QRegularExpression('checkBox(Global|System)(Exclude|Options|Replace).*'),
+                qtc.QRegularExpression(
+                    'checkBox(Global|System)(Exclude|Options|Replace|Override).*'
+                ),
             )
         )
         interactive_widgets.extend(

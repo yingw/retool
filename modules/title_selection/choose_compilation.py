@@ -6,21 +6,25 @@ from itertools import combinations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from modules.config import Config
-    from modules.dats import DatNode
+    from modules.config.config import Config
+    from modules.dat.process_dat import DatNode
 
 from modules.title_selection.choose_1g1r import choose_1g1r
 from modules.title_selection.choose_good import choose_good
 from modules.title_selection.choose_language import choose_language
 from modules.title_selection.choose_priority import choose_priority
 from modules.title_selection.choose_region import choose_region
+from modules.title_selection.choose_retroachievements import choose_retroachievements
 from modules.title_selection.choose_superset import choose_superset
 from modules.titletools import TitleTools, TraceTools
 from modules.utils import Font, eprint
 
 
 def choose_compilation(
-    compilations: set[DatNode], all_titles: dict[str, set[DatNode]], config: Config
+    compilations: set[DatNode],
+    all_titles: dict[str, set[DatNode]],
+    config: Config,
+    is_numbered: bool,
 ) -> dict[str, set[DatNode]]:
     """
     When choosing 1G1R titles from compilations and individual titles, selects titles
@@ -28,15 +32,16 @@ def choose_compilation(
 
     Args:
         compilations (set[DatNode]): A set of compilation titles to be considered as
-        DatNode instances.
+            DatNode instances.
 
-        all_titles (dict[str, set[DatNode]]): All non-compilation titles to be
-        considered.
+        all_titles (dict[str, set[DatNode]]): All non-compilation titles to be considered.
 
         config (Config): The Retool config object.
 
+        is_numbered (bool): Whether the DAT file prefixes its title names with numbers.
+
     Returns:
-        dict[str, set[DatNode]]: Compilations that have been reintegrated into
+        dict (dict[str, set[DatNode]]): Compilations that have been reintegrated into
         `all_titles`, with new 1G1R titles set accordingly.
     """
     # Get the previously set individual 1G1R titles related to the compilations
@@ -99,7 +104,9 @@ def choose_compilation(
         if short_name not in grouped_titles:
             grouped_titles[short_name] = set()
 
-        TitleTools.convert_to_virtual_titles(compilations, grouped_titles, short_name, config)
+        grouped_titles = TitleTools.convert_to_virtual_titles(
+            compilations, grouped_titles, short_name, config
+        )
 
         for individual_title in individual_titles:
             if short_name == individual_title.short_name:
@@ -119,6 +126,13 @@ def choose_compilation(
             eprint(f'Comparing titles with {key} short name', level='heading')
 
             TraceTools.trace_title('REF0067', [key], comparison_set, keep_remove=False)
+
+        # Choose RetroAchievements if the user requests it
+        if config.user_input.retroachievements:
+            comparison_set = choose_retroachievements(comparison_set, report_on_match)
+
+            if comparison_report_on_match:
+                TraceTools.trace_title('REF0139', [key], comparison_set, keep_remove=False)
 
         # Filter by preproduction and pirate
         if len(comparison_set) > 1:
@@ -203,7 +217,7 @@ def choose_compilation(
             remove_compilations: set[DatNode] = set()
 
             for title_1, title_2 in itertools.combinations(comparison_set, 2):
-                if title_1.short_name == title_2.short_name:
+                if TitleTools.check_title_equivalence(title_1, title_2):
                     if title_1.contains_titles and not title_2.contains_titles:
                         remove_compilations.add(title_1)
 
@@ -281,6 +295,7 @@ def choose_compilation(
                         # Put the individual titles through the filter process
                         filtered: dict[str, set[DatNode]] = choose_1g1r(
                             config,
+                            is_numbered,
                             {},
                             is_superset_titles=False,
                             is_compilations=True,
@@ -323,7 +338,7 @@ def choose_compilation(
     #
     # [{'Title A', 'Title B'}, {'Title A', 'Title C'}]
 
-    short_names_in_compilations: list[str] = []
+    short_names_in_compilations: list[set[str]] = []
 
     for titles in filtered_titles.values():
         for title in titles:
@@ -345,15 +360,17 @@ def choose_compilation(
             b.update(a)
 
     # Remove duplicate title groups
-    short_names_in_compilations = sorted([sorted(x) for x in short_names_in_compilations])
+    short_names_in_compilations_list: list[list[str]] = sorted(
+        [sorted(x) for x in short_names_in_compilations]
+    )
 
-    short_names_in_compilations = [
-        sublist for sublist, _ in itertools.groupby(short_names_in_compilations)
+    short_names_in_compilations_list = [
+        sublist for sublist, _ in itertools.groupby(short_names_in_compilations_list)
     ]
 
     # Get things in a format that matches short names
-    short_names_in_compilations = [
-        [x.lower() for x in sublst] for sublst in short_names_in_compilations
+    short_names_in_compilations_list = [
+        [x.lower() for x in sublst] for sublst in short_names_in_compilations_list
     ]
 
     # Add titles to a dictionary to find the optimal combination across shared
@@ -369,7 +386,7 @@ def choose_compilation(
 
     related_titles: dict[str, set[DatNode]] = {}
 
-    for short_names in short_names_in_compilations:
+    for short_names in short_names_in_compilations_list:
         key = ', '.join(short_names)
 
         if key not in related_titles:
@@ -464,7 +481,7 @@ def choose_compilation(
         report_on_match = False
 
         if config.user_input.trace:
-            report_on_match = TraceTools.trace_enable(set(titles), config.user_input.trace)
+            report_on_match = TraceTools.trace_enable(titles, config.user_input.trace)
 
         if len(titles) > 1:
             if report_on_match:
@@ -486,11 +503,11 @@ def choose_compilation(
 
             if report_on_match:
                 TraceTools.trace_title('REF0120')
-                eprint(contention_group_set, wrap=False, pause=True)
+                eprint(str(contention_group_set), wrap=False, pause=True)
 
             # Find titles that we have to keep, including their regions
             required_titles: dict[str, list[DatNode]] = {}
-            compare_group: list[DatNode] = []
+            compare_group: set[DatNode] = set()
 
             for contention_group in contention_group_set:
                 if contention_group.lower() in filtered_titles:
@@ -511,7 +528,7 @@ def choose_compilation(
 
             if report_on_match:
                 TraceTools.trace_title('REF0121')
-                eprint(required_titles_and_regions, wrap=False, pause=True)
+                eprint(str(required_titles_and_regions), wrap=False, pause=True)
 
             unique_title_names: set[str] = set()
             keep_these_titles: set[DatNode] = set()
@@ -535,14 +552,14 @@ def choose_compilation(
                         available_groupings[key].add(((title.group_name,), title.primary_region))
 
             # Get all viable combinations for this group
-            candidates: list = []
+            candidates: list[tuple[tuple[tuple[str, ...], str], ...]] = []
 
             for i in range(1, len(contention_group_set)):
                 combos = list(combinations(sorted(available_groupings[key]), i))
 
                 if report_on_match:
-                    TraceTools.trace_title('REF0122', [i])
-                    eprint(combos, wrap=False, pause=True)
+                    TraceTools.trace_title('REF0122', [str(i)])
+                    eprint(str(combos), wrap=False, pause=True)
 
                 for combo in combos:
                     # Reformat the list to see if all the needed groups and regions are there.
@@ -560,7 +577,7 @@ def choose_compilation(
 
             if report_on_match:
                 TraceTools.trace_title('REF0124')
-                eprint(candidates, wrap=False, pause=True)
+                eprint(str(candidates), wrap=False, pause=True)
 
             # Find the combination with the fewest elements
             least_elements: int = len(sorted(candidates, key=lambda x: len(x))[0])
@@ -660,17 +677,20 @@ def choose_compilation(
                             final_titles.add(title)
 
                             # Remove the original title
-                            remove_title: set[DatNode] = TitleTools.find_title(
-                                title.full_name,
-                                'full',
-                                all_titles,
-                                set(),
-                                config,
-                                deep_search=True,
-                            )
-                            all_titles[next(iter(remove_title)).group_name].remove(
-                                list(remove_title)[0]
-                            )
+                            remove: DatNode | None = None
+                            remove_found: bool = False
+
+                            for remove_titles in all_titles.values():
+                                for remove_title in remove_titles:
+                                    if remove_title.full_name == title.full_name:
+                                        remove_found = True
+                                        remove = remove_title
+                                        break
+                                if remove_found:
+                                    break
+
+                            if remove is not None:
+                                all_titles[remove.group_name].remove(remove)
 
                             # Add it to the compilations group
                             all_titles['retool_compilations_winners'].add(title)
@@ -699,15 +719,22 @@ def choose_compilation(
                     x.full_name for x in all_titles['retool_compilations_winners']
                 ]:
                     # Remove the original title
-                    remove_title = TitleTools.find_title(
-                        title.full_name, 'full', all_titles, set(), config, deep_search=True
-                    )
+                    remove = None
+                    remove_found = False
 
-                    if remove_title:
-                        all_titles[next(iter(remove_title)).group_name].remove(
-                            list(remove_title)[0]
-                        )
+                    for remove_titles in all_titles.values():
+                        for remove_title in remove_titles:
+                            if remove_title.full_name == title.full_name:
+                                remove_found = True
+                                remove = remove_title
+                                break
+                        if remove_found:
+                            break
 
+                    if remove is not None:
+                        all_titles[remove.group_name].remove(remove)
+
+                    # Add it to the compilations group
                     all_titles['retool_compilations_winners'].add(title)
 
     # Add compilations back that were removed earlier
@@ -725,33 +752,38 @@ def choose_compilation(
             if not title.cloneof:
                 clone_set: bool = False
 
+                if is_numbered:
+                    winner_title_name: str = winner_title.numbered_name
+                else:
+                    winner_title_name = winner_title.full_name
+
                 if winner_title.contains_titles:
                     # If the winner is a compilation...
                     for contains_title in winner_title.contains_titles:
                         if not title.contains_titles:
                             # Assign individual title discards to compilation winners
                             if contains_title.lower() == title.short_name:
-                                title.cloneof = winner_title.full_name
+                                title.cloneof = winner_title_name
                                 clone_set = True
                                 break
                         else:
                             # Assign compilation title discards to compilation winners
                             if contains_title.lower() in [x.lower() for x in title.contains_titles]:
-                                title.cloneof = winner_title.full_name
+                                title.cloneof = winner_title_name
                                 clone_set = True
                                 break
                 else:
                     # If the winner is an individual title...
                     if not title.contains_titles:
                         # Assign individual title discards to individual winners
-                        if winner_title.short_name == title.short_name:
-                            title.cloneof = winner_title.full_name
+                        if TitleTools.check_title_equivalence(winner_title, title):
+                            title.cloneof = winner_title_name
                             clone_set = True
                             break
                     else:
                         # Assign compilation title discards to individual winners
                         if winner_title.short_name in [x.lower() for x in title.contains_titles]:
-                            title.cloneof = winner_title.full_name
+                            title.cloneof = winner_title_name
                             clone_set = True
                             break
 
@@ -759,13 +791,22 @@ def choose_compilation(
                 if clone_set:
                     for clone_titles in all_titles.values():
                         for clone_title in clone_titles:
-                            if clone_title.cloneof == title.full_name:
-                                clone_title.cloneof = winner_title.full_name
+                            if is_numbered:
+                                if clone_title.cloneof == title.numbered_name:
+                                    clone_title.cloneof = winner_title_name
+                            else:
+                                if clone_title.cloneof == title.full_name:
+                                    clone_title.cloneof = winner_title_name
 
     # Report assignments
     for winner_title in sorted(
         all_titles['retool_compilations_winners'], key=lambda x: x.full_name
     ):
+        if is_numbered:
+            winner_title_name = winner_title.numbered_name
+        else:
+            winner_title_name = winner_title.full_name
+
         if config.user_input.trace:
             report_on_match = TraceTools.trace_enable({winner_title}, config.user_input.trace)
 
@@ -776,7 +817,7 @@ def choose_compilation(
             for clone_title in sorted(
                 all_titles['retool_compilations_discards'], key=lambda x: x.full_name
             ):
-                if clone_title.cloneof == winner_title.full_name:
+                if clone_title.cloneof == winner_title_name:
                     tree_symbol: str = '├'
 
                     if (
